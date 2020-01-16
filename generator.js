@@ -4,7 +4,8 @@ const fs = require('fs');
 
 const TYPES = {
     string: 'string',
-    integer: 'number'
+    integer: 'number',
+    number: 'number'
 }
 
 const saveFileAndLint = (path, content) => {
@@ -27,15 +28,10 @@ const generateTypes = (schemas) => {
                 type = TYPES[opts.type]
             } else {
                 console.error(`[${model.title}.${name}] ERROR: Not found type: ${opts.type}`)
+                process.exit(1)
             }
-
-            if (opts.enum) {
-                type = opts.enum.map(k => `'${k}'`).join(' | ')
-            }
-
-            if (type) {
-                return `${name}:${type};`
-            }
+            if (opts.enum) type = opts.enum.map(k => `'${k}'`).join(' | ')
+            if (type) return `${name}:${type};`
         }).join("\n")
         return `export type ${model.title}Model = {${props}}`
     }).join("\n\n")
@@ -43,7 +39,6 @@ const generateTypes = (schemas) => {
 
 module.exports = (scheme, flags) => {
     const outputDir = path.isAbsolute(flags.output) ? flags.output : path.join(process.cwd(), flags.output)
-        
     if (!fs.existsSync(outputDir)){
         fs.mkdirSync(outputDir);
     }
