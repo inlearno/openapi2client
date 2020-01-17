@@ -9,7 +9,7 @@ module.exports = {
     'plugin:node/recommended',
     'plugin:@typescript-eslint/recommended',
     "plugin:prettier/recommended",
-    "prettier/typescript",
+    "prettier/@typescript-eslint",
   ],
   parser: "@typescript-eslint/parser",
   parserOptions: {
@@ -26,6 +26,7 @@ module.exports = {
     'no-console': [0],
     '@typescript-eslint/member-delimiter-style': [0],
     '@typescript-eslint/camelcase': [0],
+    '@typescript-eslint/no-var-requires': [0],
     '@typescript-eslint/explicit-function-return-type': [0],
     'prettier/prettier': 'error',
     'react/prop-types': [0],
@@ -40,7 +41,6 @@ module.exports = {
     ],
     'constructor-super': 'error',
     'valid-typeof': 'error',
-    'no-only-tests/no-only-tests': 'error',
     'node/no-unsupported-features/es-syntax': 0,
     'node/no-unsupported-features/node-builtins': 0,
     'node/shebang': [
