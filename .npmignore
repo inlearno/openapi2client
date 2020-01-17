@@ -3,3 +3,4 @@ src
 .npmignore
 __tests__
 package-lock.json
+.babelrc
