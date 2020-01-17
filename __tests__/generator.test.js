@@ -87,8 +87,8 @@ describe('Test combinePaths', () => {
   it('Should group paths by tag', () => {
     const res = combinePaths(schema.paths)
     expect(Object.keys(res).length).toEqual(3)
-    expect(res.one.length).toEqual(2)
-    expect(res.two.length).toEqual(1)
+    expect(res.pets.length).toEqual(2)
+    expect(res.games.length).toEqual(1)
     expect(res.default.length).toEqual(1)
   })
   it('Should combine parametrs', () => {

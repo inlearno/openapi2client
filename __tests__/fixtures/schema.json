@@ -5,34 +5,35 @@
         "version": "1.0"
     },
     "paths": {
-        "'/path1'": {
+        "/pets": {
             "get": {
                 "tags": [
-                    "one"
+                    "pets"
                 ]
             }
         },
-        "'/path2'": {
+        "/pets/games": {
             "get": {
                 "tags": [
-                    "two",
-                    "one"
+                    "games",
+                    "pets"
                 ]
             }
         },
-        "'/path3'": {
+        "/pets/food": {
             "get": {}
         },
-        "/path4/{id}": {
+        "/pets/{id}": {
             "parameters": [
                 {
                     "name": "id",
                     "in": "path"
                 }
             ],
-            "post": {
+            "get": {
+                "operationId": "GetPetById",
                 "tags": [
-                    "one"
+                    "pets"
                 ]
             }
         }

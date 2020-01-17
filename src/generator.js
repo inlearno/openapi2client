@@ -1,6 +1,7 @@
 import format from 'prettier-eslint'
 import path from 'path'
 import fs from 'fs'
+import Case from 'case'
 
 const TYPES = {
   string: 'string',
@@ -82,10 +83,56 @@ export const getOutputDir = output => {
 
 export const init = options => {
   outputDir = getOutputDir(options.output)
+  const actionsDir = path.join(outputDir, 'actions')
 
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir)
   }
+  if (!fs.existsSync(actionsDir)) {
+    fs.mkdirSync(actionsDir)
+  }
+}
+
+export const getActionResponseType = _cfg => {
+  return 'any'
+}
+
+export const getActionName = cfg => {
+  return Case.camel(cfg.operationId || cfg.url)
+}
+
+export const generateAction = (name, group) => {
+  name = Case.constant(name)
+  const urlConstants = {}
+  const actions = group
+    .map(cfg => {
+      const actionName = getActionName(cfg)
+      const actionResponseType = getActionResponseType(cfg)
+      urlConstants[cfg.url] = 'URL_' + Case.constant(cfg.url).replace(/^_/, '')
+
+      return `export const ${actionName} = createAsync<void, ${actionResponseType}, AxiosError>('LOAD', async () => {
+      const { data } = await axios.get(${urlConstants[cfg.url]})
+      return data.data
+    })`
+    })
+    .join('\n\n')
+
+  const constants = Object.entries(urlConstants)
+    .map(([url, name]) => `const ${name} = '${url}'`)
+    .join('\n')
+
+  return `
+    import axios from 'axios'
+    import actionCreatorFactory from 'typescript-fsa'
+    import { asyncFactory } from 'typescript-fsa-redux-thunk'
+    import { AxiosError } from 'axios'
+    const create = actionCreatorFactory('${name}')
+    const createAsync = asyncFactory(create)
+
+    ${constants}
+
+    ${actions}
+  `
 }
 
 export default (scheme, opts) => {
@@ -94,7 +141,10 @@ export default (scheme, opts) => {
     saveFile('types.ts', generateTypes(scheme.components.schemas))
   }
   if (scheme.paths) {
-    const paths = combinePaths(scheme.paths)
-    paths //?
+    const pathsGroups = combinePaths(scheme.paths)
+    Object.entries(pathsGroups).map(([name, group]) => {
+      const content = generateAction(name, group)
+      saveFile(`actions/${name}.ts`, content)
+    })
   }
 }
