@@ -1,9 +1,12 @@
 #!/usr/bin/env node
 'use strict'
-require('dotenv').config()
-const meow = require('meow')
-const fetch = require('node-fetch')
-const generate = require('./generator.js')
+
+import dotenv from 'dotenv'
+import meow from 'meow'
+import fetch from 'node-fetch'
+import generate from './generator.js'
+
+dotenv.config()
 
 const cli = meow(
   `
@@ -36,4 +39,6 @@ if (!cli.flags.schema || !cli.flags.output) {
 fetch(cli.flags.schema)
   .then(res => res.json())
   .then(json => generate(json, cli.flags))
-  .catch(e => console.err(e.message))
+  .catch(e => {
+    throw e
+  })
