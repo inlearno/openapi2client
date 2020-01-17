@@ -1,0 +1,5 @@
+src
+!dist
+.npmignore
+__tests__
+package-lock.json
