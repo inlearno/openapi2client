@@ -2,6 +2,7 @@ module.exports = {
   env: {
     browser: true,
     node: true,
+    jest: true,
     webextensions: true
   },
   extends: [
