@@ -12,22 +12,53 @@
                 ]
             }
         },
-        "/pets/games": {
+        "/pets/game/{id}": {
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "type": "string",
+                    "required": true
+                }
+            ],
             "get": {
                 "tags": [
                     "games",
                     "pets"
+                ],
+                "parameters": [
+                    {
+                        "name": "mode",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
                 ]
             }
         },
         "/pets/food": {
             "get": {}
         },
+        "/pets/food/{section}/{subsection}": {
+            "parameters": [
+                {
+                    "name": "section",
+                    "in": "path"
+                },
+                {
+                    "name": "subsection",
+                    "in": "path"
+                }
+            ],
+            "get": {}
+        },
         "/pets/{id}": {
             "parameters": [
                 {
                     "name": "id",
-                    "in": "path"
+                    "in": "path",
+                    "description": "id \u043c\u0435\u0440\u043e\u043f\u0440\u0438\u044f\u0442\u0438\u044f"
                 }
             ],
             "get": {
@@ -47,6 +78,14 @@
                         "type": "integer"
                     },
                     "name": {
+                        "type": "string"
+                    }
+                }
+            },
+            "Dog": {
+                "title": "Dog",
+                "properties": {
+                    "id": {
                         "type": "string"
                     }
                 }
