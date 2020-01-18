@@ -58,7 +58,12 @@ export const generateType = (name, properties) => {
     name = generateTypeName()
   }
 
-  generatedTypes[name] = `export type ${name} = {${props}}`
+  const code = `export type ${name} = {${props}}`
+  if (name in generatedTypes && code !== generatedTypes[name]) {
+    return generateType(`${name}${++lastTypeIndex}`, properties)
+  }
+
+  generatedTypes[name] = code
   return name
 }
 

@@ -2,7 +2,8 @@ import {
   schemaToType,
   getTypescriptTypeRow,
   cleanGeneratedTypes,
-  getGeneratedTypes
+  getGeneratedTypes,
+  generateType
 } from '../src/generators/types'
 
 describe('Test types module', () => {
@@ -123,6 +124,45 @@ describe('Test types module', () => {
         required: true
       })
       expect(res2).toEqual('text:string')
+    })
+  })
+  describe('Test create uniq name when type already exists', () => {
+    it('Should create other type name', () => {
+      const typeName = schemaToType({
+        title: 'Pet',
+        type: 'object',
+        properties: {
+          name: {
+            type: 'string'
+          }
+        }
+      })
+
+      typeName //?
+
+      const typeName2 = generateType(typeName, {
+        name: {
+          type: 'integer'
+        }
+      })
+
+      expect(typeName).not.toEqual(typeName2)
+    })
+    it('Should use same type name', () => {
+      const typeName = 'Pet'
+      expect(
+        generateType(typeName, {
+          name: {
+            type: 'integer'
+          }
+        })
+      ).toEqual(
+        generateType(typeName, {
+          name: {
+            type: 'integer'
+          }
+        })
+      )
     })
   })
 })
