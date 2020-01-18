@@ -1,12 +1,12 @@
-import generator, {
-  toTypescriptType,
-  combinePaths,
-  getTypescriptTypeRow,
-  generateType,
-  formatCode
-} from '../src/generator'
+import generator, { formatCode } from '../src/generator'
+import { generateType, cleanGeneratedTypes, getGeneratedTypes } from '../src/generators/types'
+import { combinePaths } from '../src/generators/actions'
 import fs from 'fs'
 const schema = require('./fixtures/schema.json')
+
+afterEach(() => {
+  cleanGeneratedTypes()
+})
 
 describe('Test generator', () => {
   it('Should generate', () => {
@@ -24,62 +24,10 @@ describe('Test generator', () => {
 
 describe('Test formatCode', () => {
   it('Should format code', () => {
-    const generated = generateType('Pet', schema.components.schemas.Pet)
-    const res = formatCode(generated)
+    generateType('PetModel', schema.components.schemas.Pet.properties)
+    const generatedTypes = getGeneratedTypes()
+    const res = formatCode(generatedTypes.PetModel)
     expect(res).toEqual('export type PetModel = { id?: number; name?: string }\n')
-  })
-})
-
-describe('Test toTypescriptType', () => {
-  it('Should return string', () => {
-    const res = toTypescriptType({
-      type: 'string'
-    })
-    expect(res).toEqual('string')
-  })
-
-  it('Should return number', () => {
-    const res = toTypescriptType({
-      type: 'number'
-    })
-    expect(res).toEqual('number')
-    const res2 = toTypescriptType({
-      type: 'integer'
-    })
-    expect(res2).toEqual('number')
-  })
-  it('Should return boolean', () => {
-    const res = toTypescriptType({
-      type: 'boolean'
-    })
-    expect(res).toEqual('boolean')
-  })
-  it('Should throw error', () => {
-    expect(() => toTypescriptType({ type: 'undefined' })).toThrowError()
-    expect(() => toTypescriptType()).toThrowError()
-  })
-  it('Should return literals for enum fields', () => {
-    const res = toTypescriptType({
-      enum: ['text1', 'text2']
-    })
-    expect(res).toEqual(`'text1' | 'text2'`)
-  })
-})
-
-describe('Test getTypescriptTypeRow', () => {
-  it('Should render right row', () => {
-    const res = getTypescriptTypeRow('text', {
-      type: 'string'
-    })
-    expect(res).toEqual('text?:string')
-    const res2 = getTypescriptTypeRow('text', {
-      type: 'string',
-      required: true
-    })
-    expect(res2).toEqual('text:string')
-  })
-  it('Should throw with bad type', () => {
-    expect(() => getTypescriptTypeRow('name', {})).toThrow()
   })
 })
 
@@ -89,7 +37,7 @@ describe('Test combinePaths', () => {
     expect(Object.keys(res).length).toEqual(3)
     expect(res.pets.length).toEqual(2)
     expect(res.games.length).toEqual(1)
-    expect(res.default.length).toEqual(1)
+    expect(res.default.length).toEqual(2)
   })
   it('Should combine parametrs', () => {
     const res = combinePaths({
