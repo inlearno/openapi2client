@@ -1,6 +1,14 @@
 import Case from 'case'
 import { generateType, schemaToType, getGeneratedTypes } from './types'
 
+const actionsContext = {
+  action: null
+}
+
+export const getCtx = () => {
+  return actionsContext
+}
+
 export const combinePaths = paths => {
   return Object.entries(paths).reduce((groups, [url, op]) => {
     const { parameters = [], ...operations } = op
@@ -36,14 +44,14 @@ export const paramToSchema = ({ schema, ...param }) => {
 }
 
 export const paramsToProperties = params => {
-  params //?
   return params.reduce((props, { name, ...param }) => {
     props[name] = paramToSchema(param)
     return props
-  }, {})
+  }, {}) //?
 }
 
-export const combineActionParams = (name, params) => {
+export const combineActionParams = params => {
+  const name = Case.capital(getCtx().action, '')
   const groups = params.reduce((groups, param) => {
     if (param.in) {
       groups[param.in] = [...(groups[param.in] || []), param]
@@ -67,16 +75,14 @@ export const combineActionParams = (name, params) => {
   return paramsToProperties(params)
 }
 
-export const getActionParamsType = (name, cfg) => {
-  const params = cfg.parameters || []
+export const getActionParamsType = (params = []) => {
   if (!params.length) {
     return 'void'
   }
-  name = Case.capital(name, '')
   if (params.length === 1) {
     return schemaToType(paramToSchema(params[0]))
   } else {
-    return generateType(`${name}Params`, combineActionParams(name, params))
+    return generateType(`${getCtx().action}Params`, combineActionParams(params))
   }
 }
 
@@ -85,13 +91,16 @@ export const getActionName = cfg => {
 }
 
 export const getAction = cfg => {
-  const name = getActionName(cfg)
+  getCtx().action = getActionName(cfg)
   const urlConstant = 'URL_' + Case.constant(cfg.url).replace(/^_/, '')
   return {
-    name,
+    name: getCtx().action,
+    method: (cfg.method || 'get').toLowerCase(),
     urlConstant,
-    responseType: getActionResponseType(cfg),
-    paramsType: getActionParamsType(name, cfg)
+    types: {
+      response: getActionResponseType(cfg),
+      params: getActionParamsType(cfg.parameters)
+    }
   }
 }
 
@@ -103,19 +112,9 @@ export const getImportTypes = types => {
 
 export const generateActionCode = action => {
   return `export const ${action.name} = createAsync<${action.paramsType}, ${action.responseType}, AxiosError>('LOAD', async () => {
-    const { data } = await axios.get(${action.urlConstant})
+    const { data } = await axios.${action.method}(${action.urlConstant})
     return data.data
   })`
-}
-
-export const generateAction = cfg => {
-  const action = getAction(cfg)
-  const code = generateActionCode(action)
-  return {
-    code,
-    constanst: action.urlConstant,
-    types: [action.responseType, action.paramsType]
-  }
 }
 
 export const generateActionFileCode = (tag, pathGroup) => {
@@ -123,10 +122,11 @@ export const generateActionFileCode = (tag, pathGroup) => {
   const importTypes = []
   const actions = pathGroup
     .map(cfg => {
-      const { constanst, code, types } = generateAction(cfg)
-      importTypes.push(...types)
-      urlConstants[cfg.url] = constanst
-      return code
+      const action = getAction(cfg)
+      const { urlConstant, types } = action
+      importTypes.push(...Object.values(types))
+      urlConstants[cfg.url] = urlConstant
+      return generateActionCode(action)
     })
     .join('\n\n')
 
