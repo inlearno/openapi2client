@@ -11,7 +11,7 @@ import {
 } from '../src/generators/actions'
 const schema = require('./fixtures/schema.json')
 
-describe.only('Test actions module', () => {
+describe('Test actions module', () => {
   describe('Test combinePaths', () => {
     it('Should group paths by tag', () => {
       const res = combinePaths(schema.paths)

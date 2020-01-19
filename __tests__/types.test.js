@@ -164,5 +164,14 @@ describe('Test types module', () => {
         })
       )
     })
+    it('Name of type should starts with upper case', () => {
+      expect(
+        generateType('pet-name', {
+          name: {
+            type: 'integer'
+          }
+        })
+      ).toEqual('PetName')
+    })
   })
 })
