@@ -1,3 +1,5 @@
+import Case from 'case'
+
 const TYPES = {
   string: 'string',
   integer: 'number',
@@ -57,6 +59,8 @@ export const generateType = (name, properties) => {
   if (!name) {
     name = generateTypeName()
   }
+
+  name = Case.pascal(name)
 
   const code = `export type ${name} = {${props}}`
   if (name in generatedTypes && code !== generatedTypes[name]) {
